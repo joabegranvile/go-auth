@@ -1,0 +1,49 @@
+services:
+  app:
+    image: auth-go:v2
+    build: .
+    networks:
+      - traefik_public
+      - auth_private
+    secrets:
+      - pg_password
+    environment:
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_NAME=postgres
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.auth-go.rule=Host(`auth.127.0.0.1.lvh.me`)"
+        - "traefik.http.services.auth-go.loadbalancer.server.port=8080"
+        - "traefik.docker.network=traefik_public"
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - auth_private
+    secrets:
+      - pg_password
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      # O Postgres nativamente suporta ler a senha do arquivo secret
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+volumes:
+  pg_data:
+
+networks:
+  traefik_public:
+    external: true
+  auth_private:
+
+secrets:
+  pg_password:
+    external: true

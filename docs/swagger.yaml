@@ -1,0 +1,62 @@
+basePath: /
+definitions:
+  server.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: auth.127.0.0.1.lvh.me
+info:
+  contact: {}
+  description: API de autenticação
+  title: Auth-Go API
+  version: "1.0"
+paths:
+  /admin:
+    get:
+      description: Endpoint restrito a admin
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      summary: Painel admin
+      tags:
+      - admin
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica o usuário e retorna o token JWT
+      parameters:
+      - description: Credenciais de Login
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/server.LoginRequest'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Token JWT
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: Realizar Login
+      tags:
+      - auth
+swagger: "2.0"
